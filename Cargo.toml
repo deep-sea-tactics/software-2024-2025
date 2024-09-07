@@ -1,0 +1,13 @@
+[package]
+name = "software-2024-2025"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "software_2024_2025"
+crate-type = ["cdylib"]
+path = "rust_src/lib.rs"
+
+[dependencies]
+pyo3 = "0.22.0"
