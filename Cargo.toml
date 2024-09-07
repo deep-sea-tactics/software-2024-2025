@@ -11,3 +11,4 @@ path = "rust_src/lib.rs"
 
 [dependencies]
 pyo3 = "0.22.0"
+vecmath = "1.0.0"
