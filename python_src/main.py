@@ -4,3 +4,7 @@
 #If you're looking to jump right into things, please create a new file to keep the repository organized.
 
 #Thanks!
+
+import rust_mod
+
+print(rust_mod.sum_as_string(1, 1))

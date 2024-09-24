@@ -5,10 +5,9 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "software_2024_2025"
+name = "rust_mod"
 crate-type = ["cdylib"]
 path = "rust_src/lib.rs"
 
 [dependencies]
 pyo3 = "0.22.0"
-vecmath = "1.0.0"
