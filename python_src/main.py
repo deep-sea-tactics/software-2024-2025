@@ -5,6 +5,7 @@
 
 #Thanks!
 import numpy
+import vectormath
 import rust_mod
 
 print(rust_mod.sum_as_string(1, 1))
