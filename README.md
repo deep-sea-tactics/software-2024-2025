@@ -45,3 +45,7 @@ In the terminal, run
 `source dev_shell_scripts/run.sh`
 
 to compile everything rust + load it into python, and run the main python file.
+
+# Dependencies
+
+For any and all Python libraries, please add the `pip install` command to the `dev_shell_scripts/install.sh` script
