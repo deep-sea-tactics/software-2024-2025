@@ -3,13 +3,38 @@
 import vectormath
 import math
 
+def vector3_sub(lhs: vectormath.Vector3, rhs: vectormath.Vector3):
+    return vectormath.vector.Vector3(
+        lhs.x - rhs.x,
+        lhs.y - rhs.y,
+        lhs.z - rhs.z
+    )
+
+def vector3_mult_by_factor(lhs: vectormath.Vector3, rhs: float):
+    return vectormath.vector.Vector3(
+        lhs.x * rhs,
+        lhs.y * rhs,
+        lhs.z * rhs
+    )
+
 class Transform:
     """
     Combination between position and rotation
     """
-    def __init__(self, x, y, z, rx, ry, rz, rw):
+    def __init__(self, x: float, y: float, z: float, rx: float, ry: float, rz: float, rw: float):
         self.position = vectormath.vector.Vector3(x, y, z)
         self.rotation = Quaternion(rx, ry, rz, rw)
+    
+    def zero():
+        return Transform(
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        )
 
 class Quaternion: 
     def __init__(self, x: float, y: float, z: float, w: float):
@@ -54,11 +79,13 @@ class Quaternion:
 
         return res
     
-    def vec_to_local_quat(self):
+    def vec_to_local_quat(self, input_vector):
         """
         Transforms a vector from the global plane to the local plane of the quaternion
         """
-        pass
+        v = Quaternion.from_vec(input_vector)
+
+        res = self.conjugate() * input_vector * self
 
     def to_vec(self):
         """
@@ -66,6 +93,18 @@ class Quaternion:
         """
 
         pass
+
+    def from_vec(vector: vectormath.Vector3):
+        """
+        Vector to quaternion.
+        """
+
+        return Quaternion(
+            vector.x,
+            vector.y,
+            vector.z,
+            0
+        )
 
     def from_euler(roll: float, pitch: float, yaw: float):
         """

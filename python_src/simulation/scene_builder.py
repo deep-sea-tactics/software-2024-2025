@@ -8,6 +8,12 @@ TICK_INTERVAL: float = 0.1
 
 ROOT_ENTITY: int = 1
 
+def get_entity_in_handle_list(entity_list, query_handle):
+    for entity in entity_list:
+            if entity.handle != query_handle:
+                continue
+            
+            return entity
 
 class Scene:
     """
@@ -43,12 +49,9 @@ class Scene:
         """
         Returns entity by handle
         """
+        
+        return get_entity_in_handle_list(self.entities, query_handle)
 
-        for entity in self.entities:
-            if entity.handle != query_handle:
-                continue
-            
-            return entity
     
     def scene_root(self):
         return self.get_entity(ROOT_ENTITY)
@@ -66,6 +69,15 @@ class Entity:
     
     def reparent(self, new_parent):
         self.parent = new_parent
+    
+    def get_child(self, query_handle):
+        return get_entity_in_handle_list(self.children, query_handle)
+
+    def get_parent(self):
+        if self.parent == NONE_HANDLE:
+            return
+
+        return self.scene.get_entity(self.parent)
 
 class Point(Entity):
     """

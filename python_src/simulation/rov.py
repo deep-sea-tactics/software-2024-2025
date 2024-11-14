@@ -3,10 +3,11 @@
 import scene_builder
 import utils
 import vectormath
+import math
 
 class Thruster(scene_builder.Entity):
     """
-    Thruster object, pairs nicely with the `ROV`.
+    Thruster object, pairs nicely with `ROV`.
 
     Transform is in local space to the ROV
     """
@@ -20,7 +21,40 @@ class Thruster(scene_builder.Entity):
         self.thrust_direction = vectormath.vector.Vector3()
 
     def current_force(self):
+        """
+        Returns the current force applied from this thruster
+        """
+
         return self.max_force * self.current_throttle
+
+    def torque_force(self):
+        """
+        Returns a vector3 containing all components of the torque force for this thruster and its current throttle.
+        """
+
+        global_thrust_direction = self.get_parent().transform.rotation.vec_to_local_quat(self.thrust_direction)
+
+        # Wikipedia once again saves the day
+
+        R = utils.vector3_sub( self.transform.position, self.get_parent().transform.position )
+        r = R.as_length()
+        F = self.current_force()
+
+        # Provides a vector of the thrust relative to the ROV
+
+        theta_xz = math.atan2(global_thrust_direction.x, global_thrust_direction.z)
+        theta_yx = math.atan2(global_thrust_direction.x, global_thrust_direction.y)
+        theta_yz = math.atan2(global_thrust_direction.z, global_thrust_direction.y)
+
+        torque_yz = r * F * math.sin(theta_yz)
+        torque_yx = r * F * math.sin(theta_yx)
+        torque_xz = r * F * math.sin(theta_xz)
+
+        res = vectormath.vector.Vector3(torque_yx, torque_yz, torque_xz) # order of these might be off
+
+        return res
+        
+        
 
 class ROV(scene_builder.Entity):
     """
@@ -35,6 +69,7 @@ class ROV(scene_builder.Entity):
         super.__init__(handle)
 
         self.thrusters: list[Thruster] = []
+        self.transform = utils.Transform.zero()
     
     def create_thruster(self, x, y, z, rx, ry, rz, max_force):
         rotation_quat = utils.Quaternion.from_euler(rx, ry, rz)
