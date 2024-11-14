@@ -30,6 +30,8 @@ class Thruster(scene_builder.Entity):
     def torque_force(self):
         """
         Returns a vector3 containing all components of the torque force for this thruster and its current throttle.
+
+        https://en.wikipedia.org/wiki/Torque
         """
 
         global_thrust_direction = self.get_parent().transform.rotation.vec_to_local_quat(self.thrust_direction)

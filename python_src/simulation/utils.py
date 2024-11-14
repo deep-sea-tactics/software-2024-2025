@@ -109,6 +109,8 @@ class Quaternion:
     def from_euler(roll: float, pitch: float, yaw: float):
         """
         Create a quaternion from euler angles.
+
+        https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
         """
 
         cos_roll: float = math.cos(roll * 0.5)
