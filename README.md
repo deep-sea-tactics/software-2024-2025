@@ -16,7 +16,7 @@ This repository is written in Python and Rust using PyO3 bindings. This reposito
 # Install guide:
 ### Run this once when downloading the repository for the first time/creating a new virtual workspace
 
-*(Make sure you're in the `software-2024-2025/` directory!)*
+*(Make sure you're in the `software-2024-2025` directory!)*
 
 In the terminal, run:
 
