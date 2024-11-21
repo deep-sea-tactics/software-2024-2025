@@ -11,7 +11,7 @@ Please don't commit directly to the `main` branch unless all the features you're
 
 ## Technical Overview
 
-This repository is written in Python and Rust using PyO3 bindings. This repository will be tested and used on a debian based linux. Furthermore, **this repository is designed to run on debian linux** (specifically rasbian). Please use a debian based distrobution for all testing.
+This repository is written in Python and Rust using PyO3 bindings. This repository will be tested and used on a debian based linux. Furthermore, **this repository is designed to run on debian linux** (specifically rasbian). Please use a debian based distribution for all testing.
 
 # Install guide:
 ### Run this once when downloading the repository for the first time/creating a new virtual workspace
