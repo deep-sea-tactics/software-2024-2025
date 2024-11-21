@@ -16,7 +16,7 @@ This repository is written in Python and Rust using PyO3 bindings. This reposito
 # Install guide:
 ### Run this once when downloading the repository for the first time/creating a new virtual workspace
 
-*(Make sure you're in the /workspace/software-2024-2025/ directory!)*
+*(Make sure you're in the `software-2024-2025/` directory!)*
 
 In the terminal, run:
 
@@ -28,15 +28,10 @@ When prompted by rustup (the thing that installs rust) to 'set up the install,' 
 
 In the terminal, run:
 
+`source .venv/bin/activate`
+If a **venv** appears next to your current directory, the Python virtual environment has been successfully initialized.
+
 `source dev_shell_scripts/install.sh` again to complete the installation of vital tools.
-
-## Virtual environment
-
-In the terminal, run
-
-`source .venv/bin/activate` to activate virtual environment. **For any dependencies to work, you must activate the virtual environment!**
-
-Notice a little **(venv)** next to the path in your command line. This means you are now working in a python virtual environment.
 
 ## Running/testing code
 
@@ -44,8 +39,8 @@ In the terminal, run
 
 `source dev_shell_scripts/run.sh`
 
-to compile everything rust + load it into python, and run the main python file.
+to compile everything Rust + load it into Python, and run the main python file. In the `dev_shell_scripts` directory, there are other commands for running each subsystem.
 
 # Dependencies
 
-For any and all Python libraries, please add the `pip install` command to the `dev_shell_scripts/install.sh` script
+For any and all Python libraries that *you add*, please append the `pip install` command to the `dev_shell_scripts/install.sh` script
