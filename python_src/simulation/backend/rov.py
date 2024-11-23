@@ -1,7 +1,7 @@
 # This contains functions specific to an ROV
 
-import scene_builder
-import utils
+import backend.scene_builder as scene_builder
+import backend.utils as utils
 import vectormath
 import math
 
@@ -12,8 +12,8 @@ class Thruster(scene_builder.Entity):
     Transform is in local space to the ROV
     """
 
-    def __init__(self, handle, transform: utils.Transform, max_force: float, thrust_direction: vectormath.Vector3):
-        super.__init__(handle)
+    def __init__(self, handle, scene, transform: utils.Transform, max_force: float): #, thrust_direction: vectormath.Vector3):
+        super().__init__(handle, scene)
 
         self.transform: utils.Transform = transform
         self.max_force: int = max_force #kgf
@@ -67,8 +67,8 @@ class ROV(scene_builder.Entity):
     Center of Mass is the origin!
     """
 
-    def __init__(self, handle):
-        super.__init__(handle)
+    def __init__(self, handle, scene):
+        super().__init__(handle, scene)
 
         self.thrusters: list[Thruster] = []
         self.transform = utils.Transform.zero()
@@ -77,7 +77,9 @@ class ROV(scene_builder.Entity):
         rotation_quat = utils.Quaternion.from_euler(rx, ry, rz)
 
         new_thruster = Thruster(
-            self.scene.unique_handle(),
+            self.scene.new_handle(),
+
+            self.scene,
 
             utils.Transform(
                 x,
@@ -93,6 +95,7 @@ class ROV(scene_builder.Entity):
         )
 
         self.thrusters.append(new_thruster)
+        new_thruster.reparent(self)
     
     def update():
         """
