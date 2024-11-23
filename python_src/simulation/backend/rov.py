@@ -15,7 +15,7 @@ class Thruster(scene_builder.Entity):
     def __init__(self, handle, scene, transform: utils.Transform, max_force: float): #, thrust_direction: vectormath.Vector3):
         super().__init__(handle, scene)
 
-        self.transform: utils.Transform = transform
+        self.transform: utils.Transform = transform # in local space to parent ROV
         self.max_force: int = max_force #kgf
         self.current_throttle: float = 0.0 # Out of 1.0
         self.thrust_direction = vectormath.vector.Vector3()
@@ -55,8 +55,6 @@ class Thruster(scene_builder.Entity):
         res = vectormath.vector.Vector3(torque_yx, torque_yz, torque_xz) # order of these might be off
 
         return res
-        
-        
 
 class ROV(scene_builder.Entity):
     """
@@ -72,6 +70,7 @@ class ROV(scene_builder.Entity):
 
         self.thrusters: list[Thruster] = []
         self.transform = utils.Transform.zero()
+        self.mass = 0 #kg
     
     def create_thruster(self, x, y, z, rx, ry, rz, max_force):
         rotation_quat = utils.Quaternion.from_euler(rx, ry, rz)
@@ -97,11 +96,12 @@ class ROV(scene_builder.Entity):
         self.thrusters.append(new_thruster)
         new_thruster.reparent(self)
     
-    def update():
+    def update(self):
         """
         Updates the transform and velocity of the ROV.
         """
 
-        pass
-
-        
+        # Rotate and translate each thruster by the current transform and rotation
+        for thruster in self.thrusters:
+            thruster.transform.position = self.transform.rotation.vec_to_local_quat(thruster.transform.position)
+            thruster.transform.rotation = self.transform.rotation
