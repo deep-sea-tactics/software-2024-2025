@@ -20,4 +20,4 @@ Seconds,
 Newtons,
 Joules
 
-With the exception of kilograms, assume base metric form.
+Assume base metric form.
