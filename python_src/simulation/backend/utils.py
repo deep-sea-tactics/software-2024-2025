@@ -55,26 +55,40 @@ class Quaternion:
         """
         Returns the mathematical conjugation of the quaternion.
         """
-        res = self
 
-        res.y *= -1
-        res.z *= -1
-        res.x *= -1
+        res = Quaternion.zero()
+
+        res.x = self.x * -1
+        res.y = self.y * -1
+        res.z = self.z * -1
+        res.w = self.w
 
         return res
 
     def __mul__(self, rhs):
         """
-        Thanks, Wikipedia!
+        https://en.wikipedia.org/wiki/Quaternion
 
         Operator overload which returns the hamilton product of a quaternion
         """
 
+        a1 = self.w
+        a2 = rhs.w
+
+        b1 = self.x
+        b2 = rhs.x
+
+        c1 = self.y
+        c2 = rhs.y
+
+        d1 = self.z
+        d2 = rhs.z
+
         res = Quaternion(
-            ((self.x * rhs.x) - (self.y * rhs.y) - (self.z * rhs.z) - (self.w * rhs.w)),
-            ((self.x * rhs.y) + (self.y * rhs.x) + (self.z * rhs.w) - (self.w * rhs.z)),
-            ((self.x * rhs.z) - (self.y * rhs.w) + (self.z * rhs.x) + (self.w * rhs.y)),
-            ((self.x * rhs.w) + (self.y * rhs.z) - (self.z * rhs.y) + (self.w * rhs.x))
+            ((a1 * b2) + (b1 * a2) + (c1 * d2) - (d1 * c2)),
+            ((a1 * c2) - (b1 * d2) + (c1 * a2) + (d1 * b2)),
+            ((a1 * d2) + (b1 * c2) - (c1 * b2) + (d1 * a2)),
+            ((a1 * a2) - (b1 * b2) - (c1 * c2) - (d1 * d2))
         )
 
         return res
@@ -93,7 +107,7 @@ class Quaternion:
 
         print("vec_to_local_quat result", res.x, res.y, res.z, res.w)
 
-        return (self.conjugate() * v) * self
+        return (self * v) * self.conjugate()
 
     def to_vec(self):
         """
@@ -116,10 +130,14 @@ class Quaternion:
 
     def from_euler(roll: float, pitch: float, yaw: float):
         """
-        Create a quaternion from euler angles.
+        Create a quaternion from euler angles. Takes numbers in degrees.
 
         https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
         """
+
+        roll = math.radians(roll)
+        pitch = math.radians(pitch)
+        yaw = math.radians(yaw)
 
         cos_roll: float = math.cos(roll * 0.5)
         sin_roll: float = math.sin(roll * 0.5)
@@ -129,11 +147,13 @@ class Quaternion:
         sin_yaw: float = math.sin(yaw * 0.5)
 
         res = Quaternion(
-            cos_roll * cos_pitch * cos_yaw + sin_roll * sin_pitch * sin_yaw,
             sin_roll * cos_pitch * cos_yaw - cos_roll * sin_pitch * sin_yaw,
             cos_roll * sin_pitch * cos_yaw + sin_roll * cos_pitch * sin_yaw,
-            cos_roll * cos_pitch * sin_yaw - sin_roll * sin_pitch * cos_yaw
+            cos_roll * cos_pitch * sin_yaw - sin_roll * sin_pitch * cos_yaw,
+            cos_roll * cos_pitch * cos_yaw + sin_roll * sin_pitch * sin_yaw
         )
+
+        print("euler to quat:", res.x, res.y, res.z, res.w)
 
         return res
     
@@ -145,7 +165,7 @@ class Quaternion:
 
         yaw = math.atan2(
             2 * ((self.w * self.z) + (self.x * self.y)),
-            1 - 2 * ((self.y**2, self.z**2))
+            1 - 2 * ((self.y**2) + (self.z**2))
         )
 
         diff_qwqy_qxqz = ((self.w * self.y) - (self.x * self.z))
