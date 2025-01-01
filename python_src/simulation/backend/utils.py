@@ -136,21 +136,21 @@ class Quaternion:
         """
 
         roll = math.radians(roll)
-        pitch = math.radians(pitch)
         yaw = math.radians(yaw)
+        pitch = math.radians(pitch)
 
         cos_roll: float = math.cos(roll * 0.5)
         sin_roll: float = math.sin(roll * 0.5)
-        cos_pitch: float = math.cos(pitch * 0.5)
-        sin_pitch: float = math.sin(pitch * 0.5)
         cos_yaw: float = math.cos(yaw * 0.5)
         sin_yaw: float = math.sin(yaw * 0.5)
+        cos_pitch: float = math.cos(pitch * 0.5)
+        sin_pitch: float = math.sin(pitch * 0.5)
 
         res = Quaternion(
-            sin_roll * cos_pitch * cos_yaw - cos_roll * sin_pitch * sin_yaw,
-            cos_roll * sin_pitch * cos_yaw + sin_roll * cos_pitch * sin_yaw,
-            cos_roll * cos_pitch * sin_yaw - sin_roll * sin_pitch * cos_yaw,
-            cos_roll * cos_pitch * cos_yaw + sin_roll * sin_pitch * sin_yaw
+            sin_roll * cos_yaw * cos_pitch - cos_roll * sin_yaw * sin_pitch,
+            cos_roll * sin_yaw * cos_pitch + sin_roll * cos_yaw * sin_pitch,
+            cos_roll * cos_yaw * sin_pitch - sin_roll * sin_yaw * cos_pitch,
+            cos_roll * cos_yaw * cos_pitch + sin_roll * sin_yaw * sin_pitch
         )
 
         print("euler to quat:", res.x, res.y, res.z, res.w)
