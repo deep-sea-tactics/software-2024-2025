@@ -10,12 +10,12 @@ def vector3_sub(lhs: vectormath.Vector3, rhs: vectormath.Vector3):
         lhs.z - rhs.z
     )
 
-def vector3_mult_by_factor(lhs: vectormath.Vector3, rhs: float):
-    return vectormath.vector.Vector3(
-        lhs.x * rhs,
-        lhs.y * rhs,
-        lhs.z * rhs
-    )
+def vector3_out_of_parent_point(child: vectormath.Vector3, parent: vectormath.Vector3):
+    """
+    Returns `child` (e.g. a thruster) translated out of the parent point, `parent` (e.g. an ROV)
+    """
+
+    return child + parent
 
 class Transform:
     """
@@ -55,7 +55,7 @@ class Quaternion:
         """
         Returns the mathematical conjugation of the quaternion.
         """
-        res = self.deepcopy()
+        res = self
 
         res.y *= -1
         res.z *= -1
@@ -63,7 +63,7 @@ class Quaternion:
 
         return res
 
-    def __mult__(self, rhs):
+    def __mul__(self, rhs):
         """
         Thanks, Wikipedia!
 
@@ -79,20 +79,28 @@ class Quaternion:
 
         return res
     
-    def vec_to_local_quat(self, input_vector):
+    def vec_to_local_quat(self, input_vector: vectormath.Vector3):
         """
         Transforms a vector from the global plane to the local plane of the quaternion
         """
         v = Quaternion.from_vec(input_vector)
 
-        res = self.conjugate() * input_vector * self
+        print(v.x, v.y, v.z, v.w)
+        print(self.x, self.y, self.z, self.w)
+        print(self.conjugate().x, self.conjugate().y, self.conjugate().z, self.conjugate().w)
+
+        res = (self.conjugate() * v) * self
+
+        print("vec_to_local_quat result", res.x, res.y, res.z, res.w)
+
+        return (self.conjugate() * v) * self
 
     def to_vec(self):
         """
         Convenience that returns the quaternion as a 3D vector
         """
 
-        pass
+        return vectormath.Vector3( self.x, self.y, self.z )
 
     def from_vec(vector: vectormath.Vector3):
         """
