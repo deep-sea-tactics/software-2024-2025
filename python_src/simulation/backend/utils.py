@@ -17,6 +17,20 @@ def vector3_out_of_parent_point(child: vectormath.Vector3, parent: vectormath.Ve
 
     return child + parent
 
+def vector3_cross(a: vectormath.Vector3, b: vectormath.Vector3):
+    """
+    https://engineeringstatics.org/cross-product-math.html
+    """
+
+    res = vectormath.Vector3(
+        (a.x * b.z) - (a.z * b.x),
+        (a.x * b.y) - (a.y * b.x),
+        (a.y * b.z) - (a.z * b.y),
+    )
+
+    return res
+    
+
 class Transform:
     """
     Combination between position and rotation

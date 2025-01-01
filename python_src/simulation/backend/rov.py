@@ -64,19 +64,7 @@ class Thruster(scene_builder.Entity):
         https://en.wikipedia.org/wiki/Torque
         """
 
-        rov_position = self.get_parent().transform.position
         r = self.transform.position
-
-
-        rx = r[0]
-        ry = r[1]
-        rz = r[2]
-
-        # Componentize the third dimensional vectors and then calculate the torque force for each axis
-
-        rzy = vectormath.Vector2(rz, ry).length
-        rxy = vectormath.Vector2(rx, ry).length
-        rxz = vectormath.Vector2(rx, rz).length
 
         euler_eq: tuple[float] = self.transform.rotation.to_euler()
 
@@ -87,19 +75,7 @@ class Thruster(scene_builder.Entity):
 
         print("that would be", F.x, F.y, F.z)
 
-        theta_zy = euler_eq[0] # Roll
-        theta_xy = euler_eq[1] # Pitch
-        theta_xz = euler_eq[2] # Yaw
-
-        tx = rzy * F.x
-        ty = rxy * F.y
-        tz = rxz * F.z
-        
-        print(tx)
-        print(ty)
-        print(tz)
-
-        torque = vectormath.Vector3(tx, ty, tz)
+        torque = utils.vector3_cross(r, F)
 
         return torque
 
