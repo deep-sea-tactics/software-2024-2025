@@ -93,7 +93,7 @@ class Quaternion:
 
         return res
     
-    def vec_to_local_quat(self, input_vector: vectormath.Vector3):
+    def vec_to_local_quat(self, input_vector: vectormath.Vector3) -> vectormath.Vector3:
         """
         Transforms a vector from the global plane to the local plane of the quaternion
         """
@@ -103,11 +103,11 @@ class Quaternion:
         print(self.x, self.y, self.z, self.w)
         print(self.conjugate().x, self.conjugate().y, self.conjugate().z, self.conjugate().w)
 
-        res = (self.conjugate() * v) * self
+        res = (self * v) * self.conjugate()
 
         print("vec_to_local_quat result", res.x, res.y, res.z, res.w)
 
-        return (self * v) * self.conjugate()
+        return res.to_vec()
 
     def to_vec(self):
         """
@@ -163,18 +163,18 @@ class Quaternion:
             1 - 2 * ((self.x**2) + (self.y**2))
         )
 
-        yaw = math.atan2(
+        pitch = math.atan2(
             2 * ((self.w * self.z) + (self.x * self.y)),
             1 - 2 * ((self.y**2) + (self.z**2))
         )
 
         diff_qwqy_qxqz = ((self.w * self.y) - (self.x * self.z))
 
-        pitch = (-math.pi / 2) + 2 * math.atan2(
+        yaw = (-math.pi / 2) + 2 * math.atan2(
             math.sqrt(1 + (2 * diff_qwqy_qxqz)),
             math.sqrt(1 - (2 * diff_qwqy_qxqz))
         )
 
-        res = (roll, pitch, yaw)
+        res = (math.degrees(roll), math.degrees(pitch), math.degrees(yaw))
 
         return res

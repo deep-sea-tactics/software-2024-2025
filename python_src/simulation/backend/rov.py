@@ -12,8 +12,8 @@ class THRUSTER_DIRECTION:
     Constant unit vectors representing directions of thrust
     """
 
-    UP = vectormath.Vector3(0, 1, 0)
-    DOWN = vectormath.Vector3(0, -1, 0)
+    UP = vectormath.Vector3(1, 0, 0)
+    DOWN = vectormath.Vector3(-1, 0, 0)
 
 class Thruster(scene_builder.Entity):
     """
@@ -37,11 +37,13 @@ class Thruster(scene_builder.Entity):
 
         self.current_throttle = percent / 100
     
-    def glob_thrust_direction(self):
-        rov_position = self.get_parent().transform.position
-        point_on_thruster = utils.vector3_out_of_parent_point(self.thrust_direction, self.transform.position)
+    def thrust_vec(self):
+        """
+        Returns a unit vector representing the location of force in the scope of the thruster
+        """
+        rotated = self.transform.rotation.vec_to_local_quat(self.thrust_direction)
 
-        return utils.vector3_out_of_parent_point(point_on_thruster, rov_position)
+        return rotated
 
     def current_thrust(self):
         """
@@ -63,11 +65,8 @@ class Thruster(scene_builder.Entity):
         """
 
         rov_position = self.get_parent().transform.position
-        r = utils.vector3_out_of_parent_point( self.transform.position, rov_position )
+        r = self.transform.position
 
-        F_magnitude = self.current_thrust()
-
-        F = self.thrust_direction * vectormath.Vector3(F_magnitude, F_magnitude, F_magnitude)
 
         rx = r[0]
         ry = r[1]
@@ -75,23 +74,32 @@ class Thruster(scene_builder.Entity):
 
         # Componentize the third dimensional vectors and then calculate the torque force for each axis
 
+        rzy = vectormath.Vector2(rz, ry).length
         rxy = vectormath.Vector2(rx, ry).length
         rxz = vectormath.Vector2(rx, rz).length
-        rzy = vectormath.Vector2(rz, ry).length
 
-        Fxy = vectormath.Vector2(rx, ry).length
-        Fxz = vectormath.Vector2(rx, rz).length
-        Fzy = vectormath.Vector2(rz, ry).length
+        euler_eq: tuple[float] = self.transform.rotation.to_euler()
 
-        theta_xy = math.atan2(ry, rx)
-        theta_xz = math.atan2(rz, rx)
-        theta_zy = math.atan2(ry, rz)
+        F_dir = self.thrust_vec()
+        F_magnitude = self.current_thrust()
 
-        txy = rxy * Fxy * math.sin(theta_xy)
-        txz = rxz * Fxz * math.sin(theta_xz)
-        tzy = rzy * Fzy * math.sin(theta_zy)
+        F = vectormath.Vector3.as_length(F_dir, F_magnitude)
 
-        torque = vectormath.Vector3(txy, txz, tzy)
+        print("that would be", F.x, F.y, F.z)
+
+        theta_zy = euler_eq[0] # Roll
+        theta_xy = euler_eq[1] # Pitch
+        theta_xz = euler_eq[2] # Yaw
+
+        tx = rzy * F.x
+        ty = rxy * F.y
+        tz = rxz * F.z
+        
+        print(tx)
+        print(ty)
+        print(tz)
+
+        torque = vectormath.Vector3(tx, ty, tz)
 
         return torque
 
