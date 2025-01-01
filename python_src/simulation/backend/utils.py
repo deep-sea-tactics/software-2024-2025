@@ -136,3 +136,25 @@ class Quaternion:
         )
 
         return res
+    
+    def to_euler(self) -> tuple[float]:
+        roll = math.atan2(
+            2 * ((self.w * self.x) + (self.y * self.z)),
+            1 - 2 * ((self.x**2) + (self.y**2))
+        )
+
+        yaw = math.atan2(
+            2 * ((self.w * self.z) + (self.x * self.y)),
+            1 - 2 * ((self.y**2, self.z**2))
+        )
+
+        diff_qwqy_qxqz = ((self.w * self.y) - (self.x * self.z))
+
+        pitch = (-math.pi / 2) + 2 * math.atan2(
+            math.sqrt(1 + (2 * diff_qwqy_qxqz)),
+            math.sqrt(1 - (2 * diff_qwqy_qxqz))
+        )
+
+        res = (roll, pitch, yaw)
+
+        return res
