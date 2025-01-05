@@ -17,6 +17,11 @@ def vector3_out_of_parent_point(child: vectormath.Vector3, parent: vectormath.Ve
 
     return child + parent
 
+# If you're curious why these functions exist, despite the vectormath library...
+#
+# vectormath assumes what is now an outdated version of numpy. Rather than fix the library,
+# (it sucks!), I've just gone ahead and recreated some of the broken functions right here
+
 def vector3_cross(a: vectormath.Vector3, b: vectormath.Vector3):
     """
     Returns the cross product of `a` and `b`
@@ -38,7 +43,7 @@ def vector3_dot(a: vectormath.Vector3, b: vectormath.Vector3):
 
     https://learn.microsoft.com/en-us/previous-versions/windows/silverlight/dotnet-windows-silverlight/bb196388(v=xnagamestudio.35)
     """
-    
+
     return ((a.x * b.x) + (a.y * b.y) + (a.z * b.z))
     
 

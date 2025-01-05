@@ -3,6 +3,8 @@
 import backend.scene_builder as scene_builder
 import backend.utils as utils
 import vectormath
+import math
+import numpy
 
 UNIT = 1
 
@@ -51,8 +53,29 @@ class Thruster(scene_builder.Entity):
 
         return self.max_force * self.current_throttle
 
-    def auto_throttle_for_linear_motion(self):
-        pass
+    def auto_throttle_linear_target_force(self, target_force: vectormath.Vector3):
+        """
+        How much should this thruster fire in order to achieve the intended force vector?
+
+        This function answers that question by returning a throttle value from 0.0 to 1.0
+        """
+
+        F_dir = self.thrust_vec()
+        target_unit = target_force.as_length(1) # Why? vectormath.Vector3.normalize() modifies the vector, doesn't copy it. Wow.
+
+        # Determines how parallel the target and thruster's direction are
+        parallel_scalar_modifier = abs(utils.vector3_dot(F_dir, target_unit))
+
+        # Max force possibly produced in this direction
+        parallel_scalar = self.max_force * parallel_scalar_modifier
+
+        # Don't want the thrusters to overshoot tiny manuevers, clamp the values perfectly to the target force
+        parallel_scalar = numpy.clip(parallel_scalar, 0, target_force.length)
+
+        throttle = parallel_scalar / self.max_force
+
+        return throttle
+        
     
     def linear_force(self):
         """
