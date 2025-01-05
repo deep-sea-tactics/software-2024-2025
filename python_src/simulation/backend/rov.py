@@ -3,7 +3,6 @@
 import backend.scene_builder as scene_builder
 import backend.utils as utils
 import vectormath
-import math
 
 UNIT = 1
 
@@ -54,6 +53,18 @@ class Thruster(scene_builder.Entity):
 
     def auto_throttle_for_linear_motion(self):
         pass
+    
+    def linear_force(self):
+        """
+        Returns the summation of linear forces and the correct direction for the output of this thruster
+        """
+
+        F_dir = self.thrust_vec()
+        F_magnitude = self.current_thrust()
+
+        F = vectormath.Vector3.as_length(F_dir, F_magnitude)
+
+        return F
 
     def torque_force(self):
         """
@@ -66,14 +77,7 @@ class Thruster(scene_builder.Entity):
 
         r = self.transform.position
 
-        euler_eq: tuple[float] = self.transform.rotation.to_euler()
-
-        F_dir = self.thrust_vec()
-        F_magnitude = self.current_thrust()
-
-        F = vectormath.Vector3.as_length(F_dir, F_magnitude)
-
-        print("that would be", F.x, F.y, F.z)
+        F = self.linear_force()
 
         torque = utils.vector3_cross(r, F)
 
