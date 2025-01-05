@@ -19,6 +19,8 @@ def vector3_out_of_parent_point(child: vectormath.Vector3, parent: vectormath.Ve
 
 def vector3_cross(a: vectormath.Vector3, b: vectormath.Vector3):
     """
+    Returns the cross product of `a` and `b`
+
     https://engineeringstatics.org/cross-product-math.html
     """
 
@@ -29,6 +31,15 @@ def vector3_cross(a: vectormath.Vector3, b: vectormath.Vector3):
     )
 
     return res
+
+def vector3_dot(a: vectormath.Vector3, b: vectormath.Vector3):
+    """
+    Returns the dot product of `a` and `b`
+
+    https://learn.microsoft.com/en-us/previous-versions/windows/silverlight/dotnet-windows-silverlight/bb196388(v=xnagamestudio.35)
+    """
+    
+    return ((a.x * b.x) + (a.y * b.y) + (a.z * b.z))
     
 
 class Transform:
