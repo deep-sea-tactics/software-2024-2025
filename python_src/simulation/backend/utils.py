@@ -10,12 +10,42 @@ def vector3_sub(lhs: vectormath.Vector3, rhs: vectormath.Vector3):
         lhs.z - rhs.z
     )
 
-def vector3_mult_by_factor(lhs: vectormath.Vector3, rhs: float):
-    return vectormath.vector.Vector3(
-        lhs.x * rhs,
-        lhs.y * rhs,
-        lhs.z * rhs
+def vector3_out_of_parent_point(child: vectormath.Vector3, parent: vectormath.Vector3):
+    """
+    Returns `child` (e.g. a thruster) translated out of the parent point, `parent` (e.g. an ROV)
+    """
+
+    return child + parent
+
+# If you're curious why these functions exist, despite the vectormath library...
+#
+# vectormath assumes what is now an outdated version of numpy. Rather than fix the library,
+# (it sucks!), I've just gone ahead and recreated some of the broken functions right here
+
+def vector3_cross(a: vectormath.Vector3, b: vectormath.Vector3):
+    """
+    Returns the cross product of `a` and `b`
+
+    https://engineeringstatics.org/cross-product-math.html
+    """
+
+    res = vectormath.Vector3(
+        (a.x * b.z) - (a.z * b.x),
+        (a.x * b.y) - (a.y * b.x),
+        (a.y * b.z) - (a.z * b.y),
     )
+
+    return res
+
+def vector3_dot(a: vectormath.Vector3, b: vectormath.Vector3):
+    """
+    Returns the dot product of `a` and `b`
+
+    https://learn.microsoft.com/en-us/previous-versions/windows/silverlight/dotnet-windows-silverlight/bb196388(v=xnagamestudio.35)
+    """
+
+    return ((a.x * b.x) + (a.y * b.y) + (a.z * b.z))
+    
 
 class Transform:
     """
@@ -55,44 +85,66 @@ class Quaternion:
         """
         Returns the mathematical conjugation of the quaternion.
         """
-        res = self.deepcopy()
 
-        res.y *= -1
-        res.z *= -1
-        res.x *= -1
+        res = Quaternion.zero()
+
+        res.x = self.x * -1
+        res.y = self.y * -1
+        res.z = self.z * -1
+        res.w = self.w
 
         return res
 
-    def __mult__(self, rhs):
+    def __mul__(self, rhs):
         """
-        Thanks, Wikipedia!
+        https://en.wikipedia.org/wiki/Quaternion
 
         Operator overload which returns the hamilton product of a quaternion
         """
 
+        a1 = self.w
+        a2 = rhs.w
+
+        b1 = self.x
+        b2 = rhs.x
+
+        c1 = self.y
+        c2 = rhs.y
+
+        d1 = self.z
+        d2 = rhs.z
+
         res = Quaternion(
-            ((self.x * rhs.x) - (self.y * rhs.y) - (self.z * rhs.z) - (self.w * rhs.w)),
-            ((self.x * rhs.y) + (self.y * rhs.x) + (self.z * rhs.w) - (self.w * rhs.z)),
-            ((self.x * rhs.z) - (self.y * rhs.w) + (self.z * rhs.x) + (self.w * rhs.y)),
-            ((self.x * rhs.w) + (self.y * rhs.z) - (self.z * rhs.y) + (self.w * rhs.x))
+            ((a1 * b2) + (b1 * a2) + (c1 * d2) - (d1 * c2)),
+            ((a1 * c2) - (b1 * d2) + (c1 * a2) + (d1 * b2)),
+            ((a1 * d2) + (b1 * c2) - (c1 * b2) + (d1 * a2)),
+            ((a1 * a2) - (b1 * b2) - (c1 * c2) - (d1 * d2))
         )
 
         return res
     
-    def vec_to_local_quat(self, input_vector):
+    def vec_to_local_quat(self, input_vector: vectormath.Vector3) -> vectormath.Vector3:
         """
         Transforms a vector from the global plane to the local plane of the quaternion
         """
         v = Quaternion.from_vec(input_vector)
 
-        res = self.conjugate() * input_vector * self
+        print(v.x, v.y, v.z, v.w)
+        print(self.x, self.y, self.z, self.w)
+        print(self.conjugate().x, self.conjugate().y, self.conjugate().z, self.conjugate().w)
+
+        res = (self * v) * self.conjugate()
+
+        print("vec_to_local_quat result", res.x, res.y, res.z, res.w)
+
+        return res.to_vec()
 
     def to_vec(self):
         """
         Convenience that returns the quaternion as a 3D vector
         """
 
-        pass
+        return vectormath.Vector3( self.x, self.y, self.z )
 
     def from_vec(vector: vectormath.Vector3):
         """
@@ -108,23 +160,51 @@ class Quaternion:
 
     def from_euler(roll: float, pitch: float, yaw: float):
         """
-        Create a quaternion from euler angles.
+        Create a quaternion from euler angles. Takes numbers in degrees.
 
         https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
         """
 
+        roll = math.radians(roll)
+        yaw = math.radians(yaw)
+        pitch = math.radians(pitch)
+
         cos_roll: float = math.cos(roll * 0.5)
         sin_roll: float = math.sin(roll * 0.5)
-        cos_pitch: float = math.cos(pitch * 0.5)
-        sin_pitch: float = math.sin(pitch * 0.5)
         cos_yaw: float = math.cos(yaw * 0.5)
         sin_yaw: float = math.sin(yaw * 0.5)
+        cos_pitch: float = math.cos(pitch * 0.5)
+        sin_pitch: float = math.sin(pitch * 0.5)
 
         res = Quaternion(
-            cos_roll * cos_pitch * cos_yaw + sin_roll * sin_pitch * sin_yaw,
-            sin_roll * cos_pitch * cos_yaw - cos_roll * sin_pitch * sin_yaw,
-            cos_roll * sin_pitch * cos_yaw + sin_roll * cos_pitch * sin_yaw,
-            cos_roll * cos_pitch * sin_yaw - sin_roll * sin_pitch * cos_yaw
+            sin_roll * cos_yaw * cos_pitch - cos_roll * sin_yaw * sin_pitch,
+            cos_roll * sin_yaw * cos_pitch + sin_roll * cos_yaw * sin_pitch,
+            cos_roll * cos_yaw * sin_pitch - sin_roll * sin_yaw * cos_pitch,
+            cos_roll * cos_yaw * cos_pitch + sin_roll * sin_yaw * sin_pitch
         )
+
+        print("euler to quat:", res.x, res.y, res.z, res.w)
+
+        return res
+    
+    def to_euler(self) -> tuple[float]:
+        roll = math.atan2(
+            2 * ((self.w * self.x) + (self.y * self.z)),
+            1 - 2 * ((self.x**2) + (self.y**2))
+        )
+
+        pitch = math.atan2(
+            2 * ((self.w * self.z) + (self.x * self.y)),
+            1 - 2 * ((self.y**2) + (self.z**2))
+        )
+
+        diff_qwqy_qxqz = ((self.w * self.y) - (self.x * self.z))
+
+        yaw = (-math.pi / 2) + 2 * math.atan2(
+            math.sqrt(1 + (2 * diff_qwqy_qxqz)),
+            math.sqrt(1 - (2 * diff_qwqy_qxqz))
+        )
+
+        res = (math.degrees(roll), math.degrees(pitch), math.degrees(yaw))
 
         return res

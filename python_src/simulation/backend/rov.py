@@ -4,6 +4,17 @@ import backend.scene_builder as scene_builder
 import backend.utils as utils
 import vectormath
 import math
+import numpy
+
+UNIT = 1
+
+class THRUSTER_DIRECTION:
+    """
+    Constant unit vectors representing directions of thrust
+    """
+
+    UP = vectormath.Vector3(1, 0, 0)
+    DOWN = vectormath.Vector3(-1, 0, 0)
 
 class Thruster(scene_builder.Entity):
     """
@@ -18,43 +29,82 @@ class Thruster(scene_builder.Entity):
         self.transform: utils.Transform = transform # in local space to parent ROV
         self.max_force: int = max_force #kgf
         self.current_throttle: float = 0.0 # Out of 1.0
-        self.thrust_direction = vectormath.vector.Vector3()
+        self.thrust_direction = THRUSTER_DIRECTION.UP
 
-    def current_force(self):
+    def set_throttle(self, percent: float):
+        """
+        Set the throttle of this thruster using a percentage (out of 100)
+        """
+
+        self.current_throttle = percent / 100
+    
+    def thrust_vec(self):
+        """
+        Returns a unit vector representing the location of force in the scope of the thruster
+        """
+        rotated = self.transform.rotation.vec_to_local_quat(self.thrust_direction)
+
+        return rotated
+
+    def current_thrust(self):
         """
         Returns the current force applied from this thruster
         """
 
         return self.max_force * self.current_throttle
 
+    def auto_throttle_linear_target_force(self, target_force: vectormath.Vector3):
+        """
+        How much should this thruster fire in order to achieve the intended force vector?
+
+        This function answers that question by returning a throttle value from 0.0 to 1.0
+        """
+
+        F_dir = self.thrust_vec()
+        target_unit = target_force.as_length(1) # Why? vectormath.Vector3.normalize() modifies the vector, doesn't copy it. Wow.
+
+        # Determines how parallel the target and thruster's direction are
+        parallel_scalar_modifier = abs(utils.vector3_dot(F_dir, target_unit))
+
+        # Max force possibly produced in this direction
+        parallel_scalar = self.max_force * parallel_scalar_modifier
+
+        # Don't want the thrusters to overshoot tiny manuevers, clamp the values perfectly to the target force
+        parallel_scalar = numpy.clip(parallel_scalar, 0, target_force.length)
+
+        throttle = parallel_scalar / self.max_force
+
+        return throttle
+        
+    
+    def linear_force(self):
+        """
+        Returns the summation of linear forces and the correct direction for the output of this thruster
+        """
+
+        F_dir = self.thrust_vec()
+        F_magnitude = self.current_thrust()
+
+        F = vectormath.Vector3.as_length(F_dir, F_magnitude)
+
+        return F
+
     def torque_force(self):
         """
-        Returns a vector3 containing all components of the torque force for this thruster and its current throttle.
+        Returns a vector3 containing all components of the torque force produced by this thruster.
+
+        In units of newton-meter
 
         https://en.wikipedia.org/wiki/Torque
         """
 
-        global_thrust_direction = self.get_parent().transform.rotation.vec_to_local_quat(self.thrust_direction)
+        r = self.transform.position
 
-        # Wikipedia once again saves the day
+        F = self.linear_force()
 
-        R = utils.vector3_sub( self.transform.position, self.get_parent().transform.position )
-        r = R.as_length()
-        F = self.current_force()
+        torque = utils.vector3_cross(r, F)
 
-        # Provides a vector of the thrust relative to the ROV
-
-        theta_xz = math.atan2(global_thrust_direction.x, global_thrust_direction.z)
-        theta_yx = math.atan2(global_thrust_direction.x, global_thrust_direction.y)
-        theta_yz = math.atan2(global_thrust_direction.z, global_thrust_direction.y)
-
-        torque_yz = r * F * math.sin(theta_yz)
-        torque_yx = r * F * math.sin(theta_yx)
-        torque_xz = r * F * math.sin(theta_xz)
-
-        res = vectormath.vector.Vector3(torque_yx, torque_yz, torque_xz) # order of these might be off
-
-        return res
+        return torque
 
 class ROV(scene_builder.Entity):
     """
@@ -72,7 +122,11 @@ class ROV(scene_builder.Entity):
         self.transform = utils.Transform.zero()
         self.mass = 0 #kg
     
-    def create_thruster(self, x, y, z, rx, ry, rz, max_force):
+    def create_thruster(self, x: float, y: float, z: float, rx: float, ry: float, rz: float, max_force: float) -> Thruster:
+        """
+        Creates (and returns a reference to) a new thruster on this ROV.
+        """
+
         rotation_quat = utils.Quaternion.from_euler(rx, ry, rz)
 
         new_thruster = Thruster(
@@ -95,6 +149,8 @@ class ROV(scene_builder.Entity):
 
         self.thrusters.append(new_thruster)
         new_thruster.reparent(self)
+
+        return new_thruster
     
     def update(self):
         """
