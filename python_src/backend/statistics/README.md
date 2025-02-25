@@ -1,3 +1,7 @@
+# Statistics Module
+
+Statistics encompasses both plotting and simulation.
+
 # Simulation overview
 
 The simulation component is an elaborate function of time. This means, if you give it `t`, it will give you the position of the ROV and whatnot.

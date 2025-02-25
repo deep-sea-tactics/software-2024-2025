@@ -129,13 +129,13 @@ class Quaternion:
         """
         v = Quaternion.from_vec(input_vector)
 
-        print(v.x, v.y, v.z, v.w)
-        print(self.x, self.y, self.z, self.w)
-        print(self.conjugate().x, self.conjugate().y, self.conjugate().z, self.conjugate().w)
+        #print(v.x, v.y, v.z, v.w)
+        #print(self.x, self.y, self.z, self.w)
+        #print(self.conjugate().x, self.conjugate().y, self.conjugate().z, self.conjugate().w)
 
         res = (self * v) * self.conjugate()
 
-        print("vec_to_local_quat result", res.x, res.y, res.z, res.w)
+        #print("vec_to_local_quat result", res.x, res.y, res.z, res.w)
 
         return res.to_vec()
 
@@ -183,7 +183,7 @@ class Quaternion:
             cos_roll * cos_yaw * cos_pitch + sin_roll * sin_yaw * sin_pitch
         )
 
-        print("euler to quat:", res.x, res.y, res.z, res.w)
+        #print("euler to quat:", res.x, res.y, res.z, res.w)
 
         return res
     
