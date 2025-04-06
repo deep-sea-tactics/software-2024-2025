@@ -1,12 +1,20 @@
 import types
 
+def print_list_as_string(inp: list[str]):
+    res: str = ""
+
+    for string in inp:
+        res += string
+    
+    print(res)
+
 class Delegate:
     """
     Adds delegation functionality to Python
     """
 
-    def __init__(self):
-        self.connected: list[types.FunctionType]
+    def __init__(self, connected: list[types.FunctionType]):
+        self.connected: list[types.FunctionType] = connected
 
     def call(self, args: list[str]):
         """
@@ -61,7 +69,7 @@ class Command:
     def __init__(self, functions: list[types.FunctionType], keyword: str, description: str):
         self.keyword = keyword
         self.description = description
-        self.delegate = Delegate()
+        self.delegate = Delegate(functions)
 
     def attempt_interpret(self, inp: str):
         """
