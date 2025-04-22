@@ -94,21 +94,34 @@ class Thruster(scene_builder.Entity):
 
         return F
 
-    def auto_throttle_rotational_target_force(self, target_force: vectormath.Vector3) -> float:
+    def auto_throttle_rotational_target_force(self, torque: vectormath.Vector3) -> float:
         """
-        Whatever the `target_force`, figure out the original linear force applied at the rotational axis.
+        Whatever the `torque`, figure out the original linear force applied at the rotational axis.
 
         In the thruster's case, this value should (?) be a scalar quantity
+        
+        Recall: Torque = radius * force * sin(theta)
         """
         r: float = self.transform.position.length
-        #F_direction = self.thrust_vec()
         torque_direction: vectormath.Vector3 = self.torque(1)
 
-        #F = F * unit_torque
+        print(torque)
+        roll = torque[0]
+        pitch = torque[1]
+        yaw = torque[2]
 
-        print(r)
+        roll_linear = roll/(r * math.sin(torque_direction[0]))
+        pitch_linear = pitch/(r * math.sin(torque_direction[1]))
+        yaw_linear = yaw/(r * math.sin(torque_direction[2]))
 
-        return self.auto_throttle(target_force, torque_direction, r)
+        print("Pitch: " + pitch_linear)
+
+        linear_force = vectormath.Vector3(roll_linear, pitch_linear, yaw_linear)
+        print(linear_force)
+        #print("RADIUS: " + str(r))
+        #print("DIRECTION: " + str(torque_direction))
+
+        return self.auto_throttle(linear_force, torque_direction, r)
     
     def current_torque_force(self):
         """
@@ -195,3 +208,4 @@ class ROV(scene_builder.Entity):
         for thruster in self.thrusters:
             thruster.transform.position = self.transform.rotation.vec_to_local_quat(thruster.transform.position)
             thruster.transform.rotation = self.transform.rotation
+
