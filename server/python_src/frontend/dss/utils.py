@@ -1,12 +1,16 @@
 import types
 
-def print_list_as_string(inp: list[str]):
+def args_list_to_string(inp: list[str]):
     res: str = ""
 
     for string in inp:
         res += string
+        res += ' '
     
-    print(res)
+    return res
+
+def print_args_list_as_string(inp: list[str]):
+    print(args_list_to_string(inp))
 
 class Delegate:
     """
@@ -82,7 +86,7 @@ class Command:
 
         words = inp.split()
 
-        if words[0] != self.keyword:
+        if words[0].lower() != self.keyword.lower():
             return 1
         
         del words[0] # The first token is not an argument, it's an identifier

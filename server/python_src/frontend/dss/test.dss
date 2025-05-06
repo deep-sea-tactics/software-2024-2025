@@ -1,0 +1,7 @@
+; This is the testing DSS Script
+; For all of your DSS needs
+
+OUT Testing DSS
+
+alias TEST test
+OUT what
