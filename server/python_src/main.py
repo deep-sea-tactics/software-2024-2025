@@ -7,12 +7,7 @@
 # Thanks!
 import numpy
 import vectormath
-import rust_mod
 
 VERSION = "0.0.1"
 
 print("deep sea tactics software version " + VERSION)
-
-print(rust_mod.sum_as_string(1, 1))
-
-print(rust_mod.sum_as_string(1, 1))
