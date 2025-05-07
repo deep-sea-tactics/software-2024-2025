@@ -23,9 +23,10 @@ class Thruster(scene_builder.Entity):
     Transform is in local space to the ROV
     """
 
-    def __init__(self, handle, scene, transform: utils.Transform, max_force: float): #, thrust_direction: vectormath.Vector3):
+    def __init__(self, handle, scene, transform: utils.Transform, max_force: float, name: str = "unnamed"): #, thrust_direction: vectormath.Vector3):
         super().__init__(handle, scene)
 
+        self.name = name
         self.transform: utils.Transform = transform # in local space to parent ROV
         self.max_force: float = max_force #kgf
         self.current_throttle: float = 0.0 # Out of 1.0
@@ -199,6 +200,12 @@ class ROV(scene_builder.Entity):
 
         return new_thruster
     
+    def get_thruster_by_name(self, name: str):
+        for thruster in self.thrusters:
+            if thruster.name != name: continue
+
+            return thruster
+
     def update(self):
         """
         Updates the transform and velocity of the ROV.
