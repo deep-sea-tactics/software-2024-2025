@@ -20,7 +20,7 @@ class Delegate:
     def __init__(self, connected: list[types.FunctionType]):
         self.connected: list[types.FunctionType] = connected
 
-    def call(self, args: list[str]):
+    def call(self, args: list[str] = []):
         """
         Call all the functions connected to this delegate
         """

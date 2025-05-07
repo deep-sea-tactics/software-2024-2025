@@ -5,7 +5,10 @@ Contained within this file is the primary interface
 import utils
 import types
 
+class Tag: pass # See future definition
+
 loaded_commands: list[utils.Command] = [] # Contains every command currently defined
+loaded_tags: list[Tag] = []
 current_environment = None
 
 class Func:
@@ -56,8 +59,12 @@ class Func:
         
         return 0
 
-    def _tag_toggle_singline(args: list[str]) -> int:
+    def _tag_toggle_singleline(_args: list[str]) -> int:
         global current_environment
+        
+        current_environment.current_script_delim = Key.SINGLE_DELIM
+
+        return 0
 
 class Define:
     """
@@ -78,7 +85,27 @@ class Define:
 
         new_command: utils.Command = utils.Command([fn], keyword, description)
         loaded_commands.append(new_command)
-    
+
+    def define_tag(fn: types.FunctionType, keyword: str, description: str):
+        """
+        Tags are fancy commands for modifying program variables.
+        They are computed first before any other part of the DSS program.
+        """
+        global loaded_tags
+        loaded_tags.append(Tag(Key.TAG_IDENTIFIER + keyword, utils.Delegate([fn])))
+
+    def _dss_cmd_all_tags():
+        Define.define_tag(
+            Func._tag_toggle_singleline,
+            "singleline",
+            """
+            Toggles singleline and changes the delimiter used by the
+            interpreter.
+
+            Note: This is enabled by default when using a string stream
+            """
+        )
+
     def _dss_cmd_first_pass():
         Define.define(
             Func._new_alias,
@@ -132,9 +159,20 @@ class Key:
     COMMENT_IDENTIFIER = "#"
     DEREF = "$"
 
-    ERROR_COMMAND_FAILED_TO_INTERPRET = "Execution failure: internal command error"
-    ERROR_INVALID_DELETION = "Execution failure: invalid deletion. Unknown alias: %s"
-    WARNING_FLOATING_ALIAS = "Warning: alias \"%s\" is floating (never accessed)"
+    TAG_IDENTIFIER = "!#"
+
+    ERROR = "error: %s"
+    WARNING = "warning: %s"
+
+    ERROR_COMMAND_FAILED_TO_INTERPRET = "internal command error"
+    ERROR_INVALID_DELETION = "invalid deletion. Unknown alias: %s"
+    ERROR_SCRIPT_NOT_FOUND = "(file-io) non-existent script (%s)"
+    WARNING_FLOATING_ALIAS = "alias \"%s\" is floating (never accessed)"
+
+class Tag:
+    def __init__(self, key: str, delegate: utils.Delegate):
+        self.key = key
+        self.delegate = delegate
 
 class Alias:
     """
@@ -152,6 +190,7 @@ class Environment:
 
     def __init__(self):
         self.aliases: list[Alias] = []
+        self.current_script_delim = Key.MULTILINE_DELIM
 
     def _find_alias(self, key: str):
         for alias in self.aliases:
@@ -194,6 +233,15 @@ class Interpret:
     Pipeline for the interpretation of commands
     """
 
+    def _handle_tags(inp: str):
+        global loaded_tags
+
+        for tag in loaded_tags:
+            if (tag.key in inp) == False:
+                continue
+            
+            tag.delegate.call()
+
     def _should_ignore(cmd: str):
         formatted = cmd.strip()
         
@@ -230,13 +278,13 @@ class Interpret:
         if line > 0:
             print("Error on line", line)
         
-        print(msg)
+        print(Key.ERROR % msg)
     
     def _warn(msg: str, line: int = 0):
         if line > 0:
             print("Warning on line", line)
         
-        print(msg)
+        print(Key.WARNING % msg)
 
     def _interpret_error_catch(cmd: str, line: int = 0):
         """
@@ -254,8 +302,9 @@ class Interpret:
         """
         Handles multiple lines of Deep Seashell script.
         """
+        global current_environment
 
-        lines = inp.split(delim)
+        lines = inp.split(current_environment.current_script_delim)
 
         line_num = 0
         for line in lines:
@@ -280,12 +329,15 @@ class Interpret:
             file = open(path, "r")
             read = file.read()
 
-            Interpret._cmd_pass(Define._dss_cmd_first_pass)
+            Define._dss_cmd_all_tags()
+            Interpret._handle_tags(read)
+
+            Interpret._cmd_pass(Define._dss_cmd_first_pass, read)
             read = current_environment._reformat_script(read)
 
-            Interpret._cmd_pass(Define._dss_cmd_second_pass)
-        except FileExistsError:
-            return #Muahahahahahahahah
+            Interpret._cmd_pass(Define._dss_cmd_second_pass, read)
+        except FileNotFoundError:
+            Interpret._error(Key.ERROR_SCRIPT_NOT_FOUND % path)
 
 def init():
     global current_environment
@@ -293,5 +345,6 @@ def init():
 
 if __name__ == "__main__":
     init()
-    Interpret.source("test.dss")
-    Interpret.source("additional_test.dss")
+    #Interpret.source("./example/aliases.dss")
+    #Interpret.source("./example/error_demo.dss")
+    Interpret.source("./example/tags.dss")

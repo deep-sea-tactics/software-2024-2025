@@ -1,9 +1,8 @@
-# This is the testing DSS Script
-# For all of your DSS needs
+# Testing comments
 
 alias TESTING_NUMBER 40
 alias TESTING_COMMAND out
-alias TESTING_STRING Hello, world!
+alias TESTING_STRING alias testing
 alias UNUSED
 
 $TESTING_COMMAND $TESTING_STRING $TESTING_NUMBER
