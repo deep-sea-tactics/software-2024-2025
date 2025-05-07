@@ -170,7 +170,7 @@ class ROV(scene_builder.Entity):
         self.transform = utils.Transform.zero()
         self.mass = 0 #kg
     
-    def create_thruster(self, x: float, y: float, z: float, roll: float, pitch: float, yaw: float, max_force: float) -> Thruster:
+    def create_thruster(self, x: float, y: float, z: float, roll: float, pitch: float, yaw: float, max_force: float, name: str = "unnamed") -> Thruster:
         """
         Creates (and returns a reference to) a new thruster on this ROV.
         """
@@ -192,7 +192,9 @@ class ROV(scene_builder.Entity):
                 rotation_quat.w
             ),
 
-            max_force
+            max_force,
+
+            name
         )
 
         self.thrusters.append(new_thruster)
