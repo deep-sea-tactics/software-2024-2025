@@ -1,7 +1,11 @@
-; This is the testing DSS Script
-; For all of your DSS needs
+# This is the testing DSS Script
+# For all of your DSS needs
 
-OUT Testing DSS
+alias TESTING_NUMBER 40
+alias TESTING_COMMAND out
+alias TESTING_STRING Hello, world!
+alias UNUSED
 
-alias TEST test
-OUT what
+$TESTING_COMMAND $TESTING_STRING $TESTING_NUMBER
+
+del_alias TESTING_NUMBER

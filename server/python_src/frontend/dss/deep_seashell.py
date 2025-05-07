@@ -25,20 +25,42 @@ class Func:
     
     def _new_alias(args: list[str]) -> int:
         global current_environment
-        MIN_ARGS = 1
-
-        if len(args) < MIN_ARGS:
-            return 1
         
-        additional_args = args
+        MIN_ARGS = 1
+        if len(args) < MIN_ARGS: return 1
+        
+        additional_args = args.copy()
         del(additional_args[0])
         s_additional_args = utils.args_list_to_string(additional_args)
-
-        print(args)
 
         current_environment._new_alias(Alias(args[0], s_additional_args))
 
         return 0
+
+    def _del_alias(args: list[str]) -> int:
+        global current_environment
+        
+        MIN_ARGS = 1
+        if len(args) < MIN_ARGS: return 1
+
+        current_environment._delete_alias(args[0])
+
+        return 0
+    
+    def _del_all_aliases(args: list[str]) -> int:
+        global current_environment
+
+        if len(args) > 0: return 1
+
+        current_environment._delete_all_aliases()
+        
+        return 0
+
+    def _tag_toggle_singline(args: list[str]) -> int:
+        global current_environment
+
+
+
 
 class Define:
     """
@@ -60,7 +82,7 @@ class Define:
         new_command: utils.Command = utils.Command([fn], keyword, description)
         loaded_commands.append(new_command)
     
-    def _define_dss_alias():
+    def _dss_cmd_first_pass():
         Define.define(
             Func._new_alias,
             "alias",
@@ -71,7 +93,7 @@ class Define:
             """
         )
 
-    def _define_dss_defaults():
+    def _dss_cmd_second_pass():
         Define.define(
             Func._debug_out,
             "out",
@@ -82,26 +104,49 @@ class Define:
             """
         )
 
+        Define.define(
+            Func._del_alias,
+            "del_alias",
+            """
+            Deletes an alias, if it exists.
+
+            Arguments: <alias>
+            """
+        )
+
+        Define.define(
+            Func._del_all_aliases,
+            "delall",
+            """
+            Deletes every alias in the env.
+
+            Arguments: None
+            """
+        )
+
 class Key:
     """
     Contains various constants
     """
 
-    COMMENT_IDENTIFIER = ";"
+    MULTILINE_DELIM = "\n"
+    SINGLE_DELIM = ";"
+
+    COMMENT_IDENTIFIER = "#"
     DEREF = "$"
 
-    ERROR_COMMAND_FAILED_TO_INTERPRET = "Command failed to interpret: internal command error"
+    ERROR_COMMAND_FAILED_TO_INTERPRET = "Execution failure: internal command error"
     ERROR_INVALID_DELETION = "Execution failure: invalid deletion. Unknown alias: %s"
     WARNING_FLOATING_ALIAS = "Warning: alias \"%s\" is floating (never accessed)"
 
 class Alias:
     """
-    An alias is a constant variable.
+    An alias is a constant variable that gets placed into the script wherever seen.
     """
 
-    def __init__(self, key: str, value):
+    def __init__(self, key: str, value: str):
         self.key: str = key
-        self.value = value # What I wouldn't give for template<> and typename
+        self.value: str = value
 
 class Environment:
     """
@@ -122,14 +167,13 @@ class Environment:
     
     def _reformat_script(self, script: str):
         for alias in self.aliases:
-            deref = (Key.DEREF + alias.key)
-            print(deref)
-
-            script.replace(deref, str(alias.value))
+            deref = (Key.DEREF + alias.key).strip()
 
             if (deref in script) == False:
                 Interpret._warn(Key.WARNING_FLOATING_ALIAS % alias.key)
                 continue
+
+            script = script.replace(deref, str(alias.value))
         
         return script
     
@@ -144,6 +188,9 @@ class Environment:
             return
         
         self.aliases.remove(found)
+    
+    def _delete_all_aliases(self):
+        self.aliases.clear()
 
 class Interpret:
     """
@@ -206,12 +253,12 @@ class Interpret:
         if command_res == 1:
             Interpret._error(Key.ERROR_COMMAND_FAILED_TO_INTERPRET, line)
 
-    def _script_interpret(inp: str):
+    def _script_interpret(inp: str, delim: str = Key.MULTILINE_DELIM):
         """
         Handles multiple lines of Deep Seashell script.
         """
 
-        lines = inp.splitlines()
+        lines = inp.split(delim)
 
         line_num = 0
         for line in lines:
@@ -230,14 +277,14 @@ class Interpret:
 
             loaded_commands.clear()
             
-            Define._define_dss_alias()
+            Define._dss_cmd_first_pass()
             Interpret._script_interpret(read)
 
             loaded_commands.clear()
 
             read = current_environment._reformat_script(read)
 
-            Define._define_dss_defaults()
+            Define._dss_cmd_second_pass()
             Interpret._script_interpret(read)
         except FileExistsError:
             return #Muahahahahahahahah
@@ -245,8 +292,8 @@ class Interpret:
 def init():
     global current_environment
     current_environment = Environment()
-    Define._define_dss_defaults()
 
 if __name__ == "__main__":
     init()
     Interpret.source("test.dss")
+    Interpret.source("additional_test.dss")
