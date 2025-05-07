@@ -156,6 +156,8 @@ class Key:
     MULTILINE_DELIM = "\n"
     SINGLE_DELIM = ";"
 
+    DEFAULT_DELIM = MULTILINE_DELIM
+
     COMMENT_IDENTIFIER = "#"
     DEREF = "$"
 
@@ -298,13 +300,13 @@ class Interpret:
         if command_res == 1:
             Interpret._error(Key.ERROR_COMMAND_FAILED_TO_INTERPRET, line)
 
-    def _script_interpret(inp: str, delim: str = Key.MULTILINE_DELIM):
+    def _interpret_script(inp: str, delim: str = None):
         """
-        Handles multiple lines of Deep Seashell script.
+        Runs Deep Sea Shell script.
         """
         global current_environment
 
-        lines = inp.split(current_environment.current_script_delim)
+        lines = inp.split(delim or current_environment.current_script_delim)
 
         line_num = 0
         for line in lines:
@@ -320,7 +322,18 @@ class Interpret:
         loaded_commands.clear()
         func()
 
-        Interpret._script_interpret(read)
+        Interpret._interpret_script(read)
+
+    def run(inp: str):
+        Define._dss_cmd_all_tags()
+        Interpret._handle_tags(inp)
+
+        Interpret._cmd_pass(Define._dss_cmd_first_pass, inp)
+        inp = current_environment._reformat_script(inp)
+
+        Interpret._cmd_pass(Define._dss_cmd_second_pass, inp)
+
+        current_environment.current_script_delim = Key.DEFAULT_DELIM
 
     def source(path: str):
         global loaded_commands
@@ -328,14 +341,9 @@ class Interpret:
         try:
             file = open(path, "r")
             read = file.read()
+            
+            Interpret.run(read)
 
-            Define._dss_cmd_all_tags()
-            Interpret._handle_tags(read)
-
-            Interpret._cmd_pass(Define._dss_cmd_first_pass, read)
-            read = current_environment._reformat_script(read)
-
-            Interpret._cmd_pass(Define._dss_cmd_second_pass, read)
         except FileNotFoundError:
             Interpret._error(Key.ERROR_SCRIPT_NOT_FOUND % path)
 
@@ -345,6 +353,13 @@ def init():
 
 if __name__ == "__main__":
     init()
-    #Interpret.source("./example/aliases.dss")
     #Interpret.source("./example/error_demo.dss")
-    Interpret.source("./example/tags.dss")
+    #Interpret.source("./example/tags.dss")
+    #Interpret.source("./example/aliases.dss")
+    Interpret.run(
+        """
+        alias RUN run
+        out Ohhh nonn...
+        out You should $RUN
+        """
+    )
