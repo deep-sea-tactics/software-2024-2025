@@ -59,9 +59,6 @@ class Func:
     def _tag_toggle_singline(args: list[str]) -> int:
         global current_environment
 
-
-
-
 class Define:
     """
     Functions for command defining; actually binds functionality to words and arguments
@@ -268,6 +265,14 @@ class Interpret:
             
             Interpret._interpret_error_catch(line, line_num)
 
+    def _cmd_pass(func: types.FunctionType, read: str):
+        global loaded_commands
+
+        loaded_commands.clear()
+        func()
+
+        Interpret._script_interpret(read)
+
     def source(path: str):
         global loaded_commands
 
@@ -275,17 +280,10 @@ class Interpret:
             file = open(path, "r")
             read = file.read()
 
-            loaded_commands.clear()
-            
-            Define._dss_cmd_first_pass()
-            Interpret._script_interpret(read)
-
-            loaded_commands.clear()
-
+            Interpret._cmd_pass(Define._dss_cmd_first_pass)
             read = current_environment._reformat_script(read)
 
-            Define._dss_cmd_second_pass()
-            Interpret._script_interpret(read)
+            Interpret._cmd_pass(Define._dss_cmd_second_pass)
         except FileExistsError:
             return #Muahahahahahahahah
 
