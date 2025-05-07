@@ -3,7 +3,7 @@ This file is intended to run on an RPI-3, raspbian linux. If this file throws er
 it's likely 
 """
 
-import pigpio
+import pigpio # type: ignore
 import time
 import threading
 
