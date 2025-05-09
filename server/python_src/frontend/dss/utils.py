@@ -98,4 +98,5 @@ class Command:
             return 2
     
     def help(self):
+        print(self.keyword)
         print(self.description)

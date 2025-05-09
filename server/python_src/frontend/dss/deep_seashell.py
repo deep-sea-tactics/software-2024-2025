@@ -4,6 +4,7 @@ Contained within this file is the primary interface
 
 import frontend.dss.utils as utils
 import types
+import os
 
 class Tag: pass # See future definition
 
@@ -58,6 +59,12 @@ class DefaultCmd:
         current_environment._delete_all_aliases()
         
         return 0
+
+    def _source(args: list[str]) -> int:
+        MIN_ARGS = 1
+        if len(args) < MIN_ARGS: return 1
+
+        Interpret.source(args[0])
 
     def _tag_toggle_singleline(_args: list[str]) -> int:
         global current_environment
@@ -154,6 +161,21 @@ class Define:
             """
         )
 
+        Define.define(
+            DefaultCmd._source,
+            "src",
+            """
+            Run a DSS script.
+
+            Arguments: <cwd relative path>
+            """
+        )
+    
+    def _define_all():
+        Define._dss_cmd_first_pass()
+        Define._dss_cmd_second_pass()
+        Define._dss_cmd_all_tags()
+
 class Key:
     """
     Contains various constants
@@ -178,6 +200,7 @@ class Key:
     WARNING_FLOATING_ALIAS = "alias \"%s\" is floating (never accessed)"
 
     EXIT = "exit"
+    HELP = "help"
 
     CMD_LINE = "dss$ "
 
@@ -346,6 +369,12 @@ class Interpret:
         current_environment.current_script_delim = Key.DEFAULT_DELIM
 
     def source(path: str):
+        """
+        Run a DSS script
+
+        `path` specifies the location of the file
+        """
+
         global loaded_commands
 
         try:
@@ -358,10 +387,17 @@ class Interpret:
             Interpret._error(Key.ERROR_SCRIPT_NOT_FOUND % path)
     
     def _input_loop():
+        global loaded_commands
+
         while True:
             try:
                 user_input = input(Key.CMD_LINE)
+
                 if user_input == Key.EXIT: break
+                if user_input == Key.HELP:
+                    Define._define_all()
+                    for cmd in loaded_commands:
+                        cmd.help()
 
                 current_environment.current_script_delim = Key.SINGLE_DELIM
                 Interpret.run(user_input)
