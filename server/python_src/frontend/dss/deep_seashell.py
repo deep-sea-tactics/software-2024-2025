@@ -64,7 +64,9 @@ class DefaultCmd:
         MIN_ARGS = 1
         if len(args) < MIN_ARGS: return 1
 
+        current_environment.current_script_delim = Key.DEFAULT_DELIM
         Interpret.source(args[0])
+        return 0
 
     def _tag_toggle_singleline(_args: list[str]) -> int:
         global current_environment
@@ -396,7 +398,7 @@ class Interpret:
                 if user_input == Key.EXIT: 
                     clear_cmdline() 
                     break
-                
+
                 if user_input == Key.HELP:
                     Define._define_all()
                     for cmd in loaded_commands:
