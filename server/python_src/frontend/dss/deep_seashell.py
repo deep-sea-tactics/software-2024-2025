@@ -177,6 +177,10 @@ class Key:
     ERROR_SCRIPT_NOT_FOUND = "(file-io) non-existent script (%s)"
     WARNING_FLOATING_ALIAS = "alias \"%s\" is floating (never accessed)"
 
+    EXIT = "exit"
+
+    CMD_LINE = "dss$ "
+
 class Tag:
     def __init__(self, key: str, delegate: utils.Delegate):
         self.key = key
@@ -352,6 +356,17 @@ class Interpret:
 
         except FileNotFoundError:
             Interpret._error(Key.ERROR_SCRIPT_NOT_FOUND % path)
+    
+    def _input_loop():
+        while True:
+            try:
+                user_input = input(Key.CMD_LINE)
+                if user_input == Key.EXIT: break
+
+                current_environment.current_script_delim = Key.SINGLE_DELIM
+                Interpret.run(user_input)
+            except KeyboardInterrupt:
+                break
 
 def is_initialized():
     return (current_environment != None)
@@ -362,13 +377,4 @@ def init():
 
 if __name__ == "__main__":
     init()
-    #Interpret.source("./example/error_demo.dss")
-    #Interpret.source("./example/tags.dss")
-    #Interpret.source("./example/aliases.dss")
-    Interpret.run(
-        """
-        alias RUN run
-        out Ohhh nonn...
-        out You should $RUN
-        """
-    )
+    Interpret._input_loop()
