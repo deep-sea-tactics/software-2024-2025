@@ -14,6 +14,8 @@ this directory.
 :)
 """
 import frontend.dss.deep_seashell as dss
+dss.init()
+dss.Interpret.run("out client dss is initialized")
 import sys
 import os
 sys.path.append(os.getcwd() + "/client/python_src/thruster")

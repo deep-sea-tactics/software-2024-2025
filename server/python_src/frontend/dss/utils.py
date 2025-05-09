@@ -7,6 +7,8 @@ def args_list_to_string(inp: list[str]):
         res += string
         res += ' '
     
+    res = res.strip()
+
     return res
 
 def print_args_list_as_string(inp: list[str]):
