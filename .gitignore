@@ -1,5 +1,8 @@
 /target
 
+# DST packages
+/packages
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 .pytest_cache/
