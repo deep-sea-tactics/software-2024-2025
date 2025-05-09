@@ -3,7 +3,12 @@ This file is intended to run on an RPI-3, raspbian linux. If this file throws er
 it's likely because you're *not* on raspbian linux
 """
 
-import pigpio # type: ignore
+try:
+        import pigpio # type: ignore
+except ModuleNotFoundError:
+        print("error(client): pigpio not found- are you executing on the client")
+        exit()
+
 import time
 import threading
 

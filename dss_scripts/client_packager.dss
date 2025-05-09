@@ -4,3 +4,4 @@ freighter::pckgfile client server/python_src/frontend/dss/deep_seashell.py
 freighter::pckgfile client server/python_src/frontend/dss/utils.py
 freighter::pckgfile client client/python_src/thruster/thruster.py
 out "client" package defined!
+out hint: you will have to run freighter::pckgbuild
