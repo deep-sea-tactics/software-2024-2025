@@ -161,6 +161,7 @@ class ROV(scene_builder.Entity):
     Doubles as a physics body without collisions.
 
     Center of Mass is the origin!
+    Rotation: 0p 0r 0y is ROV front
     """
 
     def __init__(self, handle, scene):
@@ -170,7 +171,18 @@ class ROV(scene_builder.Entity):
         self.transform = utils.Transform.zero()
         self.mass = 0 #kg
     
-    def create_thruster(self, x: float, y: float, z: float, roll: float, pitch: float, yaw: float, max_force: float, name: str = "unnamed") -> Thruster:
+    def create_thruster(
+            self, 
+            x: float, 
+            y: float, 
+            z: float, 
+            roll: float, 
+            pitch: float, 
+            yaw: float, 
+            max_force: float, 
+            name: str = "unnamed"
+        ) -> Thruster:
+
         """
         Creates (and returns a reference to) a new thruster on this ROV.
         """
@@ -207,6 +219,11 @@ class ROV(scene_builder.Entity):
             if thruster.name != name: continue
 
             return thruster
+    
+    def auto_throttle_all(self, dir: vectormath.Vector3):
+        for thruster in self.thrusters:
+            throttle = thruster.auto_throttle(dir)
+            thruster.set_throttle(throttle)
 
     def update(self):
         """
