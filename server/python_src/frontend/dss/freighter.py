@@ -1,6 +1,6 @@
 import os
 import shutil
-import deep_seashell as dss
+import frontend.dss.deep_seashell as dss
 
 NAVIGATE_DELIM = "/"
 PACKAGES_DIR = "packages"
@@ -83,6 +83,8 @@ class Key:
     MESSAGE_FINISHED = SWN + " finished building package \"%s\""
     MESSAGE_CLEARING = SWN + " clearing existing package \"%s\""
 
+    ERROR_FILE_DOES_NOT_EXIST = SWN + " building package \"%s\" failed: file %s does not exist"
+
 class Package:
     """
     A package containing code.
@@ -118,18 +120,24 @@ class Package:
             print(Key.MESSAGE_ADDED % (file.get_abs_relative_path(), self.name))
 
             open(os.path.abspath(filepath) + NAVIGATE_DELIM + file.filename, "w+")
-            shutil.copyfile(
-                file.get_abs_relative_path(), 
-                filepath + NAVIGATE_DELIM + file.filename
-            )
+
+            try:
+                shutil.copyfile(
+                    file.get_abs_relative_path(), 
+                    filepath + NAVIGATE_DELIM + file.filename
+                )
+            except FileNotFoundError:
+                print(Key.ERROR_FILE_DOES_NOT_EXIST % (self.name, file.get_abs_relative_path()))
+                break
+                
         
         print(Key.MESSAGE_FINISHED % (self.name))
 
-class DSS:
+class FreighterDSS:
     loaded_packages: list[Package] = []
 
     def _find_package(pckg_name: str) -> Package | None:
-        for pckg in DSS.loaded_packages:
+        for pckg in FreighterDSS.loaded_packages:
             if pckg.name != pckg_name:
                 continue
 
@@ -139,14 +147,14 @@ class DSS:
         MIN_ARGS = 1
         if len(args) < MIN_ARGS: return 1
 
-        DSS.loaded_packages.append(Package(args[0]))
+        FreighterDSS.loaded_packages.append(Package(args[0]))
         return 0
     
     def cmd_package_add_file(args: list[str]):
         MIN_ARGS = 2
         if len(args) < MIN_ARGS: return 1
 
-        package = DSS._find_package(args[0])
+        package = FreighterDSS._find_package(args[0])
         if package == None: return 1
 
         package.add_file(args[1])
@@ -157,16 +165,16 @@ class DSS:
         MIN_ARGS = 1
         if len(args) < MIN_ARGS: return 1
 
-        package = DSS._find_package(args[0])
+        package = FreighterDSS._find_package(args[0])
         if package == None: return 1
 
         package.build()
 
         return 0
     
-    def define_all():
+    def define_all(_args):
         dss.Define.define(
-            DSS.cmd_package,
+            FreighterDSS.cmd_package,
             NAMESPACE + "pckgdef",
             """
             Creates a freighter package
@@ -176,7 +184,7 @@ class DSS:
         )
 
         dss.Define.define(
-            DSS.cmd_package_add_file,
+            FreighterDSS.cmd_package_add_file,
             NAMESPACE + "pckgfile",
             """
             Adds a file to the package
@@ -186,7 +194,7 @@ class DSS:
         )
 
         dss.Define.define(
-            DSS.cmd_package_build,
+            FreighterDSS.cmd_package_build,
             NAMESPACE + "pckgbuild",
             """
             Builds the package
@@ -195,7 +203,9 @@ class DSS:
             """
         )
 
-dss.Define.additional_second_pass_commands.connect(DSS.define_all)
+def init():
+    # pass
+    dss.Define.additional_second_pass_commands.connect(FreighterDSS.define_all)
 
 if __name__ == "__main__":
     setup_packaging_system()

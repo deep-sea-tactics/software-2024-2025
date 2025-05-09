@@ -2,7 +2,7 @@
 Contained within this file is the primary interface
 """
 
-import utils
+import frontend.dss.utils as utils
 import types
 
 class Tag: pass # See future definition
@@ -11,7 +11,7 @@ loaded_commands: list[utils.Command] = [] # Contains every command currently def
 loaded_tags: list[Tag] = []
 current_environment = None
 
-class Func:
+class DefaultCmd:
     """
     Contains the functionality for each command.
 
@@ -96,7 +96,7 @@ class Define:
 
     def _dss_cmd_all_tags():
         Define.define_tag(
-            Func._tag_toggle_singleline,
+            DefaultCmd._tag_toggle_singleline,
             "singleline",
             """
             Toggles singleline and changes the delimiter used by the
@@ -106,12 +106,12 @@ class Define:
             """
         )
     
-    additional_first_pass_commands: utils.Delegate = utils.Delegate()
+    additional_first_pass_commands: utils.Delegate = utils.Delegate([])
     def _dss_cmd_first_pass():
         Define.additional_first_pass_commands.call()
 
         Define.define(
-            Func._new_alias,
+            DefaultCmd._new_alias,
             "alias",
             """
             Defines a new alias.
@@ -120,12 +120,12 @@ class Define:
             """
         )
 
-    additional_second_pass_commands: utils.Delegate = utils.Delegate()
+    additional_second_pass_commands: utils.Delegate = utils.Delegate([])
     def _dss_cmd_second_pass():
         Define.additional_second_pass_commands.call()
 
         Define.define(
-            Func._debug_out,
+            DefaultCmd._debug_out,
             "out",
             """
             Returns its argument back to the standard out
@@ -135,7 +135,7 @@ class Define:
         )
 
         Define.define(
-            Func._del_alias,
+            DefaultCmd._del_alias,
             "del_alias",
             """
             Deletes an alias, if it exists.
@@ -145,7 +145,7 @@ class Define:
         )
 
         Define.define(
-            Func._del_all_aliases,
+            DefaultCmd._del_all_aliases,
             "delall",
             """
             Deletes every alias in the env.
@@ -377,4 +377,4 @@ def init():
 
 if __name__ == "__main__":
     init()
-    Interpret._input_loop()
+    #Interpret._input_loop()
