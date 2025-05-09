@@ -105,8 +105,11 @@ class Define:
             Note: This is enabled by default when using a string stream
             """
         )
-
+    
+    additional_first_pass_commands: utils.Delegate = utils.Delegate()
     def _dss_cmd_first_pass():
+        Define.additional_first_pass_commands.call()
+
         Define.define(
             Func._new_alias,
             "alias",
@@ -117,7 +120,10 @@ class Define:
             """
         )
 
+    additional_second_pass_commands: utils.Delegate = utils.Delegate()
     def _dss_cmd_second_pass():
+        Define.additional_second_pass_commands.call()
+
         Define.define(
             Func._debug_out,
             "out",
@@ -346,6 +352,9 @@ class Interpret:
 
         except FileNotFoundError:
             Interpret._error(Key.ERROR_SCRIPT_NOT_FOUND % path)
+
+def is_initialized():
+    return (current_environment != None)
 
 def init():
     global current_environment
