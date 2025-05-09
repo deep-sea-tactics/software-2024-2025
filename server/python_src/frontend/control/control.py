@@ -91,8 +91,6 @@ if __name__ == "__main__":
 
     running = True
 
-    #TODO: De-nest this... pile of crap
-
     while running:
 
         for event in pygame.event.get():
@@ -101,4 +99,4 @@ if __name__ == "__main__":
                     running = False
                 
                 case pygame.KEYDOWN:
-                    application.handle_input(event.key)
+                    Application.handle_input(event.key)
