@@ -102,7 +102,7 @@ class Scene:
         return get_entity_in_handle_list(self.entities, query_handle)
 
     
-    def scene_root(self) -> Entity:
+    def get_scene_root(self) -> Entity:
         """
         Returns the scene root entity
         """
