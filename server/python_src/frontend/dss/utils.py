@@ -17,7 +17,7 @@ class Delegate:
     Adds delegation functionality to Python
     """
 
-    def __init__(self, connected: list[types.FunctionType] = []):
+    def __init__(self, connected: list[types.FunctionType]):
         self.connected: list[types.FunctionType] = connected
 
     def call(self, args: list[str] = []):
