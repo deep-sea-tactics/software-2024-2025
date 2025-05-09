@@ -202,7 +202,7 @@ class Key:
     EXIT = "exit"
     HELP = "help"
 
-    CMD_LINE = "dss$ "
+    CMD_LINE = "(%s) dss$ "
 
 class Tag:
     def __init__(self, key: str, delegate: utils.Delegate):
@@ -391,9 +391,12 @@ class Interpret:
 
         while True:
             try:
-                user_input = input(Key.CMD_LINE)
+                user_input = input(Key.CMD_LINE % os.getcwd())
 
-                if user_input == Key.EXIT: break
+                if user_input == Key.EXIT: 
+                    clear_cmdline() 
+                    break
+                
                 if user_input == Key.HELP:
                     Define._define_all()
                     for cmd in loaded_commands:
@@ -402,14 +405,19 @@ class Interpret:
                 current_environment.current_script_delim = Key.SINGLE_DELIM
                 Interpret.run(user_input)
             except KeyboardInterrupt:
+                clear_cmdline()
                 break
 
 def is_initialized():
     return (current_environment != None)
 
+def clear_cmdline():
+    os.system("clear")
+
 def init():
     global current_environment
     current_environment = Environment()
+    clear_cmdline()
 
 if __name__ == "__main__":
     init()
