@@ -1,6 +1,6 @@
 """
 This file is intended to run on an RPI-3, raspbian linux. If this file throws errors on your system,
-it's likely 
+it's likely because you're *not* on raspbian linux
 """
 
 import pigpio # type: ignore
@@ -87,9 +87,17 @@ class Application:
                 print("Proc: {} tickets".format(index))
 
 class SEQUENCES:
-        TEST = ServoSequence([
-                SN(2.0, 1500),
-                SN(1.1, 1555),
+        INIT = ServoSequence([
+                SN(1.5, 1500),
+        ])
+
+        END = ServoSequence([
+                SN(1.0, 0)
+        ])
+
+        THRUSTER_TEST = ServoSequence([
+                SN(1.5, 1500),
+                SN(1.5, 1550),
                 SN(1.0, 0)
         ])
 
@@ -103,8 +111,8 @@ TESTING_PIN = 4
 # not get confused. (They will continue to run even
 # after the sequence ends unless told otherwise)
 
-def test_thruster(application: Application):
-        thread = threading.Thread(target=SEQUENCES.TEST.exec_seq, args=(application, TESTING_PIN,))
+def thruster_seq(application: Application, seq: ServoSequence, pin: int):
+        thread = threading.Thread(target=seq.exec_seq, args=(application, pin,))
         thread.start()
         return thread
 
@@ -115,13 +123,11 @@ def ticketing_heartbeat(application: Application):
 def main():
         application = Application()
         application.init_pi()
-
-        thruster_thread = test_thruster(application)
         ticketing_thread = threading.Thread(target=ticketing_heartbeat, args=(application,))
-
         ticketing_thread.start()
 
-        thruster_thread.join()
+        thruster_seq(application, SEQUENCES.THRUSTER_TEST)
+
         ticketing_thread.join()
 
 if __name__ == "__main__":
