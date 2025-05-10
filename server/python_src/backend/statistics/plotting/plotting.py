@@ -22,8 +22,11 @@ import time
 plotID = 0
 plotDict = {}
 interval = 1
-plt.ion() #Interactive ON
+#plt.ion() #Interactive ON
 
+
+def defaultFigData2D():
+    return [[], []]
 
 #Plot Object Class
 class plotObject:
@@ -34,7 +37,7 @@ class plotObject:
     the internal numerical system matplotlib uses to track plots.
     Meanwhile, the key is the external way the user should use to track plots.
     '''
-    figData = [[0], [0]]
+    figData = defaultFigData2D()
     projection_3d: bool
 
     #Initialization
@@ -51,10 +54,10 @@ class plotObject:
 
         #Projection set-up
         if not projection_3d:
-            self.figData = [[0], [0]]
+            self.figData = defaultFigData2D()
             fig2D = plt.figure(plotID)
         else:
-            self.figData = [[0], [0], [0]]
+            self.figData = [[], [], []]
             fig3D = plt.figure(plotID).add_subplot(projection='3d')
             fig3D.set_zlabel(z_axis)
         
@@ -155,13 +158,12 @@ def tick(key, x = None, y = None, z = None):
             data[2].append(0)
     
     # Final report
-    if projection_3d == False:
-        plt.plot(data[0], data[1]) 
-    else:
-        plt.plot(data[0], data[1], data[2]) 
+    # if projection_3d == False:
+        # plt.plot(data[0], data[1]) 
+    # else:
+        # plt.plot(data[0], data[1], data[2]) 
 
-
-
+MARKER_WIDTH = 10.0
 
 #Test stuff
 if __name__ == "__main__":
@@ -169,7 +171,11 @@ if __name__ == "__main__":
     plotObject.default2D(PLOT)
     tick(PLOT, x=0, y=40)
     tick(PLOT, x=2, y=50)
-    plt.scatter(plotAt(PLOT).figData[0], plotAt(PLOT).figData[1])
+    tick(PLOT, x=4, y=70)
+    plt.xlabel("Thyme")
+    plt.ylabel("Death")
+    plt.title("Goofy Goober Rock")
+    plt.scatter(plotAt(PLOT).figData[0], plotAt(PLOT).figData[1], linewidths=MARKER_WIDTH)
     plt.savefig("res.png")
 
     exit()
