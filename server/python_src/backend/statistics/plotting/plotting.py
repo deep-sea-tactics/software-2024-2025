@@ -16,6 +16,7 @@ pip install matplotlib
 import numpy as np
 import matplotlib.pyplot as plt 
 import random
+import frontend.dss.deep_seashell as dss
 import time 
 
 #General set up
@@ -124,14 +125,20 @@ class plotObject:
 
 
 #Get object out of plotDict
-def plotAt(key: str):
-    return (plotDict[key])
+def plotAt(key: str) -> plotObject | None:
+    try:
+        return (plotDict[key])
+    except KeyError:
+        return None
 
 ''''
 Tick, updates a graph
 Dynamically adpatable with optional x, y, and z inputs 
 '''
 def tick(key, x = None, y = None, z = None):
+    if plotAt(key) == None:
+        return
+
     figureID = plotAt(key).storedID
     data = plotAt(key).figData
     projection_3d = plotAt(key).projection_3d
@@ -163,7 +170,80 @@ def tick(key, x = None, y = None, z = None):
     # else:
         # plt.plot(data[0], data[1], data[2]) 
 
+NAMESPACE = "plotting::"
+FILE_EXT = ".png"
+class PlottingDSS:
+    def cmd_plot_def(args: list[str]):
+        MINIMUM_ARGS = 1
+        if len(args) < MINIMUM_ARGS: return 1
+
+        plotObject.default2D(args[0])
+        return 0
+    
+    def cmd_plot_entry(args: list[str]):
+        MINIMUM_ARGS = 3
+        if len(args) < MINIMUM_ARGS: return 1
+
+        found = plotAt(args[0])
+        if found == None: return 1
+
+        try:
+            tick(args[0], float(args[1]), float(args[2]))
+        except (ValueError, TypeError):
+            return 1
+        
+        return 0
+    
+    def cmd_render(args: list[str]):
+        MINIMUM_ARGS = 5
+        if len(args) < MINIMUM_ARGS: return 1
+
+        found = plotAt(args[0])
+        if found == None: return 1
+
+        plt.xlabel(args[1])
+        plt.ylabel(args[2])
+        plt.title(args[3])
+        plt.scatter(found.figData[0], found.figData[1], linewidths=MARKER_WIDTH)
+        plt.savefig(args[4] + FILE_EXT)
+    
+    def _define_all(_args):
+        dss.Define.define(
+            PlottingDSS.cmd_plot_def,
+            NAMESPACE + "pltdef",
+            """
+            Defines a plot.
+
+            Arguments: <name>
+            """
+        )
+
+        dss.Define.define(
+            PlottingDSS.cmd_plot_entry,
+            NAMESPACE + "pltentry",
+            """
+            Inserts an entry into a plot.
+
+            Arguments: <plot name> <x> <y>
+            """
+        )
+
+        dss.Define.define(
+            PlottingDSS.cmd_render,
+            NAMESPACE + "pltrender",
+            """
+            Renders the plot to file.
+
+            Arguments: <plot name> <x label> <y label> <title> <file name>
+            """
+        )
+
+        
+FIGURE_NAME = "res.png"
 MARKER_WIDTH = 10.0
+
+def init():
+    dss.Define.additional_second_pass_commands.connect(PlottingDSS._define_all)
 
 #Test stuff
 if __name__ == "__main__":
