@@ -38,22 +38,16 @@ class Application():
     """
     bound: dict[int, Actions] = {}
 
-    def handle_input(key: int):
+    def handle_input(key: int, value: bool):
         retrieved = Application.bound.get(key)
 
         if retrieved == None:
             return
 
         print(retrieved)
+        print(value)
 
 class ControlScheme:
-    def inverted_pitch():
-        bind(pygame.K_w, Actions.PITCH_DOWN)
-        bind(pygame.K_s, Actions.PITCH_UP)
-    
-    def normal_pitch():
-        bind(pygame.K_s, Actions.PITCH_DOWN)
-        bind(pygame.K_w, Actions.PITCH_UP)
 
     def define_all():
         """
@@ -68,23 +62,25 @@ class ControlScheme:
         (unless, of course, in an emergency or for testing)
         """
 
-        ControlScheme.inverted_pitch()
+        bind(pygame.K_w, Actions.STRAFE_FORWARD)
+        bind(pygame.K_s, Actions.STRAFE_BACKWARD)
+        bind(pygame.K_a, Actions.STRAFE_LEFT)
+        bind(pygame.K_d, Actions.STRAFE_RIGHT)
 
-        bind(pygame.K_a, Actions.YAW_LEFT)
-        bind(pygame.K_d, Actions.YAW_RIGHT)
         bind(pygame.K_q, Actions.ROLL_LEFT)
         bind(pygame.K_e, Actions.ROLL_RIGHT)
         
-        bind(pygame.K_LSHIFT, Actions.STRAFE_FORWARD)
-        bind(pygame.K_LCTRL, Actions.STRAFE_BACKWARD)
-        bind(pygame.K_LEFT, Actions.STRAFE_LEFT)
-        bind(pygame.K_RIGHT, Actions.STRAFE_RIGHT)
-        bind(pygame.K_UP, Actions.STRAFE_RISE)
-        bind(pygame.K_DOWN, Actions.STRAFE_SINK)
+        bind(pygame.K_LEFT, Actions.YAW_LEFT)
+        bind(pygame.K_RIGHT, Actions.YAW_RIGHT)
+        bind(pygame.K_UP, Actions.PITCH_DOWN)
+        bind(pygame.K_DOWN, Actions.PITCH_UP)
+
+        bind(pygame.K_SPACE, Actions.STRAFE_RISE)
+        bind(pygame.K_LCTRL, Actions.STRAFE_SINK)
 
 if __name__ == "__main__":
     pygame.init()
-    screen = pygame.display.set_mode((10, 10))
+    screen = pygame.display.set_mode((200, 200))
 
     application = Application()
     ControlScheme.define_all()
@@ -99,4 +95,7 @@ if __name__ == "__main__":
                     running = False
                 
                 case pygame.KEYDOWN:
-                    Application.handle_input(event.key)
+                    Application.handle_input(event.key, True)
+                
+                case pygame.KEYUP:
+                    Application.handle_input(event.key, False)
