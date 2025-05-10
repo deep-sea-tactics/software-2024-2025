@@ -164,24 +164,33 @@ def tick(key, x = None, y = None, z = None):
 
 
 #Test stuff
-plotObject.default2D("KEY2D")
-plotObject("KEY2D2", False, "guaca", "mole", "", "this me gauc")
-plotObject.default3D("KEY3D")
-plotObject.default3D("guacamole")
+if __name__ == "__main__":
+    PLOT = "MATE Floats! Data"
+    plotObject.default2D(PLOT)
+    tick(PLOT, x=0, y=40)
+    tick(PLOT, x=2, y=50)
+    plt.scatter(plotAt(PLOT).figData[0], plotAt(PLOT).figData[1])
+    plt.savefig("res.png")
 
-for i in range(100):
-    tick("KEY2D", x=4, y=random.randrange(-1000, -500))
-    tick("KEY2D2", y=random.randrange(-1000, -500))
-    tick("KEY3D", z=45)
-    tick("guacamole", x=random.randrange(-1000, -500), z=random.randrange(-10, 50))
-    #plotAt("guacamole").reportAtTime(i)
+    exit()
+    plotObject.default2D("KEY2D")
+    plotObject("KEY2D2", False, "guaca", "mole", "", "this me gauc")
+    plotObject.default3D("KEY3D")
+    plotObject.default3D("guacamole")
 
-plotAt("KEY2D2").reportAtTime(10)
-plotAt("KEY2D2").reportAtTime(plotAt("KEY2D2").getDataSize()-1)
-plotAt("KEY2D2").setDataAtTime(10, 1, 1000, 1000)
-plotAt("KEY2D2").reportAtTime(10)
-plotAt("KEY2D2").reportAtTime(plotAt("KEY2D2").getDataSize()-1)
+    for i in range(100):
+        tick("KEY2D", x=4, y=random.randrange(-1000, -500))
+        tick("KEY2D2", y=random.randrange(-1000, -500))
+        tick("KEY3D", z=45)
+        tick("guacamole", x=random.randrange(-1000, -500), z=random.randrange(-10, 50))
+        #plotAt("guacamole").reportAtTime(i)
 
-tick("KEY2D2")
+    plotAt("KEY2D2").reportAtTime(10)
+    plotAt("KEY2D2").reportAtTime(plotAt("KEY2D2").getDataSize()-1)
+    plotAt("KEY2D2").setDataAtTime(10, 1, 1000, 1000)
+    plotAt("KEY2D2").reportAtTime(10)
+    plotAt("KEY2D2").reportAtTime(plotAt("KEY2D2").getDataSize()-1)
 
-print(plotAt("KEY2D2").getDataAROC())
+    tick("KEY2D2")
+
+    print(plotAt("KEY2D2").getDataAROC())
