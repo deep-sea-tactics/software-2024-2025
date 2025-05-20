@@ -173,6 +173,9 @@ def tick(key, x = None, y = None, z = None):
 NAMESPACE = "plotting::"
 FILE_EXT = ".png"
 class PlottingDSS:
+    """
+    This grafts the plotting subsystem to DSS
+    """
     def cmd_plot_def(args: list[str]):
         MINIMUM_ARGS = 1
         if len(args) < MINIMUM_ARGS: return 1
