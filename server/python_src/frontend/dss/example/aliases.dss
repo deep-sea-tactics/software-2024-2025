@@ -1,0 +1,10 @@
+# Testing comments
+
+alias TESTING_NUMBER 40
+alias TESTING_COMMAND out
+alias TESTING_STRING alias testing
+alias UNUSED
+
+$TESTING_COMMAND $TESTING_STRING $TESTING_NUMBER
+
+del_alias TESTING_NUMBER

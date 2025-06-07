@@ -1,0 +1,6 @@
+out Additional testing
+
+out $TESTING_STRING
+out $TESTING_NUMBER
+
+del_alias INVALID_ALIAS

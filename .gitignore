@@ -1,5 +1,11 @@
 /target
 
+# DST packages
+/packages
+
+# Resulting graphs
+*.png
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 .pytest_cache/

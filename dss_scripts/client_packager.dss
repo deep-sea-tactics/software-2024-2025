@@ -1,0 +1,10 @@
+alias N client
+
+out defining "$N" package...
+freighter::pckgdef $N
+freighter::pckgfile $N server/python_src/frontend/dss/deep_seashell.py
+freighter::pckgfile $N server/python_src/frontend/dss/utils.py
+freighter::pckgfile $N client/python_src/thruster/thruster.py
+freighter::pckgfile $N server/python_src/client.py
+out "$N" package defined!
+out hint: you will have to run freighter::pckgbuild
